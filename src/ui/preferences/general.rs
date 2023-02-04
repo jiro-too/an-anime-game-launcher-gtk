@@ -51,7 +51,12 @@ pub struct AppWidgets {
     pub dxvk_groups: adw::PreferencesGroup,
     pub dxvk_recommended_only: gtk::Switch,
 
-    pub dxvk_components: Rc<Vec<DxvkGroup>>
+    pub dxvk_components: Rc<Vec<DxvkGroup>>,
+
+    pub game_location: adw::EntryRow,
+    pub game_temporary_location: adw::EntryRow,
+
+
 }
 
 impl AppWidgets {
@@ -81,7 +86,10 @@ impl AppWidgets {
             dxvk_groups: get_object(&builder, "dxvk_groups")?,
             dxvk_recommended_only: get_object(&builder, "dxvk_recommended_only")?,
 
-            dxvk_components: Default::default()
+            dxvk_components: Default::default(),
+
+            game_location: get_object(&builder,"game_location")?,
+            game_temporary_location: get_object(&builder,"game_temporary_location")?,
         };
 
         let config = config::get()?;
@@ -210,6 +218,21 @@ impl App {
     /// Add default events and values to the widgets
     fn init_events(self) -> Self {
         self.widgets.repair_game.connect_clicked(Actions::RepairGame.into_fn(&self));
+
+        self.widgets.game_location.connect_changed(move |state| {
+                if let Ok(mut config) = config::get() {
+                    config.game.path = state.text().as_str().to_string().into();
+                    config::update(config);
+                }
+        });
+
+        self.widgets.game_location.connect_changed(move |state| {
+                if let Ok(mut config) = config::get() {
+                    config.launcher.temp = Some(state.text().as_str().to_string().into());
+                    config::update(config);
+                }
+        });
+
 
         // Voiceover download/delete button event
         for (i, row) in (*self.widgets.voieover_components).iter().enumerate() {
@@ -683,6 +706,8 @@ impl App {
                 }
             }
         }
+        self.widgets.game_location.set_text(&config.game.path.into_os_string().into_string().unwrap());
+        self.widgets.game_temporary_location.set_text(&config.launcher.temp.unwrap().into_os_string().into_string().unwrap());
 
         // Update downloaded wine versions
         self.update(Actions::UpdateWineComboRow).unwrap();

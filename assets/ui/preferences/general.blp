@@ -37,7 +37,18 @@ Adw.PreferencesPage page {
             }
         }
     }
+    Adw.PreferencesGroup {
+        title: "Game Location";
 
+        Adw.EntryRow game_location {
+            title: "Game Folder";
+			
+        }
+
+        Adw.EntryRow game_temporary_location {
+            title: "Temporary Download Location";
+        }
+    }
     Adw.PreferencesGroup {
         title: "Status";
 

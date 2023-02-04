@@ -299,7 +299,11 @@ impl App {
                             glib::MainContext::default().invoke(move || {
                                 this.update(Actions::PreferencesGoBack).unwrap();
 
-                                this.toast("Failed to update preferences", err);
+                                this.toast("Failed to update preferences. Resetting game path preferences.", err);
+                                let mut config = config::get().unwrap();
+                                config.game.path = consts::launcher_dir().unwrap().join("game/drive_c/Program Files/Genshin Impact");
+                                config.game.path = consts::launcher_dir().unwrap();
+                                config::update(config);
                             });
                         }
                     });
@@ -1070,6 +1074,10 @@ impl App {
                         glib::MainContext::default().invoke(move || {
                             this.toast("Failed to get initial launcher state", err);
                         });
+                        let mut config = config::get().unwrap();
+                        config.game.path = consts::launcher_dir().unwrap().join("game/drive_c/Program Files/Genshin Impact");
+                        config.launcher.temp = consts::launcher_dir();
+                        config::update(config);
                     }
                 }
             });
